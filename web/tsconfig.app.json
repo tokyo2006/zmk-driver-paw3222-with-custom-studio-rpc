@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "types": ["vite/client"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    // NOTE: erasableSyntaxOnly deliberately disabled (unlike the module
+    // template default) -- ts-proto emits real `enum` declarations (not
+    // erasable-only syntax) for the custom-settings proto's SettingWriteMode/
+    // SettingConfidentiality/etc. enums, generated from
+    // proto/xinta/zmk/custom_settings/custom_settings.proto (vendored via
+    // web/buf.gen.yaml's second input directory, see that file). This repo's
+    // own paw3222.proto has no enums, so this was previously unnoticed.
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
+  },
+  "include": ["src"]
+}

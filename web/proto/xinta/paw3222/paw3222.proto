@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package xinta.paw3222;
+
+// `source` addresses which firmware image's local devices a request targets.
+// 0 (the default, omitted) means this device (the Studio RPC central
+// itself). The PAW3222 driver currently only supports local devices
+// (split-peripheral RPC relay is not yet implemented).
+message GetInfoRequest { uint32 source = 1; }
+
+message RuntimeConfig {
+    uint32 cpi = 1;
+    bool force_awake = 2;
+    bool disable_burst_read = 3;
+}
+
+message DeviceInfo {
+    bool ready = 1;
+    uint32 product_id = 2;
+    uint32 revision_id = 3;
+    int32 init_error = 4;
+    RuntimeConfig runtime_config = 5;
+    uint32 device_index = 6;
+    string settings_id = 7;
+}
+
+message GetInfoResponse {
+    repeated DeviceInfo devices = 1;
+}
+
+message ReadDiagnosticsRequest {
+    uint32 device_index = 1;
+    uint32 source = 2;
+}
+
+message ReadDiagnosticsResponse {
+    uint32 product_id1 = 1;
+    uint32 product_id2 = 2;
+    uint32 motion = 3;
+    uint32 cpi = 4;
+}
+
+message ReadRegisterRequest {
+    uint32 device_index = 1;
+    uint32 address = 2;
+    uint32 source = 3;
+}
+
+message ReadRegisterResponse { uint32 value = 1; }
+
+message WriteRegisterRequest {
+    uint32 device_index = 1;
+    uint32 address = 2;
+    uint32 value = 3;
+    uint32 source = 4;
+}
+
+message WriteRegisterResponse {}
+
+message Request {
+    oneof request_type {
+        GetInfoRequest get_info = 1;
+        ReadDiagnosticsRequest read_diagnostics = 2;
+        ReadRegisterRequest read_register = 3;
+        WriteRegisterRequest write_register = 4;
+    }
+}
+
+message ErrorResponse { string message = 1; }
+
+message Response {
+    oneof response_type {
+        ErrorResponse error = 1;
+        GetInfoResponse get_info = 2;
+        ReadDiagnosticsResponse read_diagnostics = 3;
+        ReadRegisterResponse read_register = 4;
+        WriteRegisterResponse write_register = 5;
+    }
+}
