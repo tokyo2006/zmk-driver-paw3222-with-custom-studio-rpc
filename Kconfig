@@ -1,0 +1,41 @@
+menuconfig PAW3222
+  bool "PAW3222 mouse optical sensor"
+  select SPI
+  depends on INPUT
+  depends on DT_HAS_XINTA_PAW3222_ENABLED
+  help
+      Enable PAW3222 mouse optical sensor.
+
+if PAW3222
+
+module = PAW3222
+module-str = PAW3222
+source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"
+
+endif #PAW3222
+
+config ZMK_PAW3222_STUDIO_RPC
+    bool "Enable PAW3222 custom Studio RPC"
+    depends on ZMK_STUDIO
+    select ZMK_PAW3222_PROTOBUF
+    help
+      Custom (unofficial) ZMK Studio RPC subsystem exposing PAW3222 sensor
+      info and diagnostics. Works with zero PAW3222 devices present (e.g.
+      native_sim), so it does not depend on CONFIG_PAW3222 directly.
+
+config ZMK_PAW3222_PROTOBUF
+    bool
+    select NANOPB
+    imply NANOPB_NO_ERRMSG
+    imply NANOPB_WITHOUT_64BIT
+    imply NANOPB_NO_ENCODE_SIZE_CHECK
+    select ZMK_LOW_PRIORITY_WORK_QUEUE
+
+config ZMK_PAW3222_CUSTOM_SETTINGS
+    bool "Enable PAW3222 runtime settings via zmk-feature-custom-settings"
+    depends on ZMK_CUSTOM_SETTINGS
+    help
+      Registers PAW3222 sensor parameters (cpi, force-awake) as custom
+      settings (subsystem "xinta__paw3222"), readable/writable over the
+      generic custom-settings Studio RPC subsystem and persisted via the
+      Zephyr settings subsystem. Works with zero PAW3222 devices present.

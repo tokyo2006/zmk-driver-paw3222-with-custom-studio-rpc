@@ -1,0 +1,48 @@
+description: |
+  Sensor driver for the PixArt PAW3222 optical mouse sensor
+
+compatible: "xinta,paw3222"
+
+include: spi-device.yaml
+
+properties:
+  irq-gpios:
+    type: phandle-array
+    required: true
+    description: GPIO connected to the motion pin, active low.
+
+  power-gpios:
+    type: phandle-array
+    required: false
+    description: GPIO connected to the power control pin.
+
+  cpi:
+    type: int
+    description: CPI resolution for the sensor (range 608 - 4826, step 38).
+
+  evt-type:
+    type: int
+    required: true
+
+  x-input-code:
+    type: int
+    required: true
+
+  y-input-code:
+    type: int
+    required: true
+
+  force-awake:
+    type: boolean
+    description: Initialize the sensor in "force awake" mode.
+
+  disable-burst-read:
+    type: boolean
+    description: |
+      If true, disables burst read and uses single register reads for motion data.
+
+  settings-id:
+    type: string
+    description: |
+      Stable short id (up to 8 ASCII characters) used to build this device's
+      per-device custom setting keys ("<param>@<id>").
