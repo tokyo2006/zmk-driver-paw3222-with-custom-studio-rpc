@@ -26,6 +26,7 @@ message DeviceInfo {
 
 message GetInfoResponse {
     repeated DeviceInfo devices = 1;
+    uint32 relay_request_id = 2;
 }
 
 message ReadDiagnosticsRequest {
@@ -75,5 +76,30 @@ message Response {
         ReadDiagnosticsResponse read_diagnostics = 3;
         ReadRegisterResponse read_register = 4;
         WriteRegisterResponse write_register = 5;
+        DeferredResponse deferred = 6;
+    }
+}
+
+message DeferredResponse { uint32 request_id = 1; }
+
+message PeripheralResponse {
+    uint32 source = 1;
+    uint32 request_id = 2;
+    Response response = 3;
+}
+
+message RelayRequest {
+    uint32 request_id = 1;
+    Request request = 2;
+}
+
+message RelayResponse {
+    uint32 request_id = 1;
+    Response response = 2;
+}
+
+message Notification {
+    oneof notification_type {
+        PeripheralResponse peripheral_response = 1;
     }
 }

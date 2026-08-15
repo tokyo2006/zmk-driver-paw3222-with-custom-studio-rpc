@@ -9,6 +9,9 @@
 #include <zmk/studio/custom.h>
 #include <xinta/paw3222/paw3222.pb.h>
 #include <xinta/paw3222/paw3222_request_exec.h>
+#if IS_ENABLED(CONFIG_ZMK_PAW3222_SPLIT_RPC_RELAY)
+#include <xinta/paw3222/paw3222_relay.h>
+#endif
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
@@ -56,9 +59,28 @@ static bool paw3222_rpc_handle_request(const zmk_custom_CallRequest *raw_request
         return true;
     }
 
-    if (!paw3222_request_exec_handle(&req, resp)) {
-        LOG_WRN("Unsupported paw3222 request type: %d", req.which_request_type);
-        set_error(resp, "Unsupported request type");
+    uint32_t source = paw3222_request_get_source(&req);
+    bool is_broadcast_get_info = req.which_request_type == xinta_paw3222_Request_get_info_tag &&
+                                 source == PAW3222_SOURCE_ALL;
+
+    if (source == 0 || is_broadcast_get_info) {
+        if (!paw3222_request_exec_handle(&req, resp)) {
+            LOG_WRN("Unsupported paw3222 request type: %d", req.which_request_type);
+            set_error(resp, "Unsupported request type");
+        }
+#if IS_ENABLED(CONFIG_ZMK_PAW3222_SPLIT_RPC_RELAY)
+        if (is_broadcast_get_info &&
+            resp->which_response_type == xinta_paw3222_Response_get_info_tag) {
+            resp->response_type.get_info.relay_request_id = paw3222_relay_broadcast_request(&req);
+        }
+#endif
+    } else {
+#if IS_ENABLED(CONFIG_ZMK_PAW3222_SPLIT_RPC_RELAY)
+        paw3222_relay_dispatch_request(source, &req, resp);
+#else
+        set_error(resp, "source %u requested but CONFIG_ZMK_PAW3222_SPLIT_RPC_RELAY is not enabled",
+                  source);
+#endif
     }
 
     return true;

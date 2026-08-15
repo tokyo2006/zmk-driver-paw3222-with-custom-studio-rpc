@@ -38,3 +38,7 @@ endif()
 if(CONFIG_ZMK_PAW3222_STUDIO_RPC)
     target_sources(app PRIVATE src/studio/paw3222_handler.c)
 endif()
+
+if(CONFIG_ZMK_PAW3222_SPLIT_RPC_RELAY)
+    target_sources(app PRIVATE src/split/paw3222_relay.c)
+endif()

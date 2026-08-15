@@ -23,6 +23,18 @@ config ZMK_PAW3222_STUDIO_RPC
       info and diagnostics. Works with zero PAW3222 devices present (e.g.
       native_sim), so it does not depend on CONFIG_PAW3222 directly.
 
+config ZMK_PAW3222_SPLIT_RPC_RELAY
+    bool "Relay PAW3222 Studio RPC to split peripherals"
+    depends on ZMK_SPLIT_RELAY_EVENT
+    select ZMK_PAW3222_PROTOBUF
+    help
+      Enable on BOTH halves of a split keyboard to reach PAW3222 devices
+      living on a split peripheral through the central's xinta__paw3222
+      Studio RPC subsystem: any request with a nonzero `source` is relayed to
+      the matching peripheral over CONFIG_ZMK_SPLIT_RELAY_EVENT, and the
+      response arrives back as a PeripheralResponse Studio notification
+      (relaying is asynchronous, unlike a local request).
+
 config ZMK_PAW3222_PROTOBUF
     bool
     select NANOPB

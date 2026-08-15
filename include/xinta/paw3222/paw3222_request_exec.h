@@ -9,6 +9,8 @@
 extern "C" {
 #endif
 
+#define PAW3222_SOURCE_ALL UINT32_MAX
+
 bool paw3222_request_exec_handle(const xinta_paw3222_Request *req,
                                  xinta_paw3222_Response *resp);
 
