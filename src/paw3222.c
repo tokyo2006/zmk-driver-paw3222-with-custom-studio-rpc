@@ -27,12 +27,12 @@
 #endif
 
 #include "../include/paw3222.h"
-#include <xinta/paw3222/paw3222_api.h>
-#include <xinta/paw3222/paw3222_settings_apply.h>
+#include <cormoran/paw3222/paw3222_api.h>
+#include <cormoran/paw3222/paw3222_settings_apply.h>
 
 LOG_MODULE_REGISTER(paw32xx, CONFIG_ZMK_LOG_LEVEL);
 
-#define DT_DRV_COMPAT xinta_paw3222
+#define DT_DRV_COMPAT cormoran_paw3222
 
 #if DT_HAS_COMPAT_STATUS_OKAY(DT_DRV_COMPAT)
 
@@ -746,7 +746,7 @@ static int paw32xx_pm_action(const struct device *dev, enum pm_device_action act
 
 DT_INST_FOREACH_STATUS_OKAY(PAW32XX_INIT)
 
-////// Public API (see include/xinta/paw3222/paw3222_api.h) //////////
+////// Public API (see include/cormoran/paw3222/paw3222_api.h) //////////
 
 #include <string.h>
 

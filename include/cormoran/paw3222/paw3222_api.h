@@ -18,7 +18,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <zephyr/device.h>
-#include <xinta/paw3222/paw3222_settings_id.h>
+#include <cormoran/paw3222/paw3222_settings_id.h>
 
 #ifdef __cplusplus
 extern "C" {

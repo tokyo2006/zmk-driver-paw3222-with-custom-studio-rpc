@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package xinta.paw3222;
+package cormoran.paw3222;
 
 // `source` addresses which firmware image's local devices a request targets.
 // 0 (the default, omitted) means this device (the Studio RPC central

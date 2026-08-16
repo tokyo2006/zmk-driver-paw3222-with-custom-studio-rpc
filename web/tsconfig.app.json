@@ -24,7 +24,7 @@
     // template default) -- ts-proto emits real `enum` declarations (not
     // erasable-only syntax) for the custom-settings proto's SettingWriteMode/
     // SettingConfidentiality/etc. enums, generated from
-    // proto/xinta/zmk/custom_settings/custom_settings.proto (vendored via
+    // proto/cormoran/zmk/custom_settings/custom_settings.proto (vendored via
     // web/buf.gen.yaml's second input directory, see that file). This repo's
     // own paw3222.proto has no enums, so this was previously unnoticed.
     "noFallthroughCasesInSwitch": true,

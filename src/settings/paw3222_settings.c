@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 xinta
+ * Copyright (c) 2026 cormoran
  *
  * SPDX-License-Identifier: MIT
  */
@@ -12,19 +12,19 @@
 #include <zephyr/kernel.h>
 #include <zephyr/sys/util.h>
 
-#include <xinta/zmk/custom_settings.h>
-#include <xinta/paw3222/paw3222_api.h>
-#include <xinta/paw3222/paw3222_settings_apply.h>
-#include <xinta/paw3222/paw3222_settings_id.h>
+#include <cormoran/zmk/custom_settings.h>
+#include <cormoran/paw3222/paw3222_api.h>
+#include <cormoran/paw3222/paw3222_settings_apply.h>
+#include <cormoran/paw3222/paw3222_settings_id.h>
 
 #include <zmk/event_manager.h>
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
-#define DT_DRV_COMPAT xinta_paw3222
+#define DT_DRV_COMPAT cormoran_paw3222
 
-#define PAW3222_SETTINGS_SUBSYSTEM_ID "xinta__paw3222"
+#define PAW3222_SETTINGS_SUBSYSTEM_ID "cormoran__paw3222"
 
 #define PAW3222_SETTINGS_KEY_BUF_SIZE 40
 

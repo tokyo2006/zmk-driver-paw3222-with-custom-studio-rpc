@@ -5,9 +5,9 @@ import {
   ReadDiagnosticsResponse,
   Request,
   Response,
-} from "./proto/xinta/paw3222/paw3222";
+} from "./proto/cormoran/paw3222/paw3222";
 
-export const PAW3222_SUBSYSTEM_IDENTIFIER = "xinta__paw3222";
+export const PAW3222_SUBSYSTEM_IDENTIFIER = "cormoran__paw3222";
 export const PAW3222_PRODUCT_ID = 0x30;
 
 export function SensorInfo() {

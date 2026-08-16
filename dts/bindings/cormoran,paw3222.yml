@@ -1,7 +1,7 @@
 description: |
   Sensor driver for the PixArt PAW3222 optical mouse sensor
 
-compatible: "xinta,paw3222"
+compatible: "cormoran,paw3222"
 
 include: spi-device.yaml
 

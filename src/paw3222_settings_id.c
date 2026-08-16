@@ -1,4 +1,4 @@
-#include <xinta/paw3222/paw3222_settings_id.h>
+#include <cormoran/paw3222/paw3222_settings_id.h>
 
 #include <stdint.h>
 #include <stdio.h>

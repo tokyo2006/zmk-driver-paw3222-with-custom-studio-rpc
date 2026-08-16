@@ -7,7 +7,7 @@ import { LockState } from "@zmkfirmware/zmk-studio-ts-client/core";
 /**
  * Tracks ZMK Studio's core lock state for the connected device.
  *
- * The `xinta__paw3222` subsystem is secured (Phase E): every RPC call
+ * The `cormoran__paw3222` subsystem is secured (Phase E): every RPC call
  * against it (and the settings subsystem) fails with an `UNLOCK_REQUIRED`
  * meta error while Studio is locked. This hook subscribes to core lock
  * notifications (`onNotification({type: "core", ...})`) so the UI can show

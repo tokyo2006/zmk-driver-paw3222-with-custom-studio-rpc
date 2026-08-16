@@ -46,7 +46,7 @@ describe("App Component", () => {
     it("should connect to device and render the feature cards", async () => {
       mocks.mockSuccessfulConnection({
         deviceName: "Test Keyboard",
-        subsystems: ["xinta__paw3222", "cormoran_custom_settings"],
+        subsystems: ["cormoran__paw3222", "cormoran_custom_settings"],
       });
 
       const { connect: serial_connect } =
@@ -93,7 +93,7 @@ describe("App Component", () => {
     it("shows a locked banner when a core lock-state notification arrives", async () => {
       mocks.mockSuccessfulConnection({
         deviceName: "Test Keyboard",
-        subsystems: ["xinta__paw3222", "cormoran_custom_settings"],
+        subsystems: ["cormoran__paw3222", "cormoran_custom_settings"],
         notifications: [
           {
             core: {
@@ -120,7 +120,7 @@ describe("App Component", () => {
     it("does not show a locked banner while unlocked", async () => {
       mocks.mockSuccessfulConnection({
         deviceName: "Test Keyboard",
-        subsystems: ["xinta__paw3222", "cormoran_custom_settings"],
+        subsystems: ["cormoran__paw3222", "cormoran_custom_settings"],
         notifications: [
           {
             core: {

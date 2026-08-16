@@ -1,0 +1,3 @@
+cormoran.paw3222.ErrorResponse.message        max_size:64
+cormoran.paw3222.GetInfoResponse.devices      max_count:2
+cormoran.paw3222.DeviceInfo.settings_id       max_size:9

@@ -3,7 +3,7 @@
 /**
  * @file paw3222_relay.h
  *
- * @brief Split relay bridge entry points for the `xinta.paw3222` Studio
+ * @brief Split relay bridge entry points for the `cormoran.paw3222` Studio
  * RPC subsystem, when CONFIG_ZMK_PAW3222_SPLIT_RPC_RELAY is enabled -- see
  * DESIGN.md Phase F and src/split/paw3222_relay.c.
  *
@@ -20,7 +20,7 @@
  *    PeripheralResponse notification, all sharing the returned request_id.
  */
 
-#include <xinta/paw3222/paw3222.pb.h>
+#include <cormoran/paw3222/paw3222.pb.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,8 +36,8 @@ extern "C" {
  * @param resp Always filled with a DeferredResponse (or an ErrorResponse if
  *   encoding/relaying failed outright).
  */
-void paw3222_relay_dispatch_request(uint32_t source, const xinta_paw3222_Request *req,
-                                    xinta_paw3222_Response *resp);
+void paw3222_relay_dispatch_request(uint32_t source, const cormoran_paw3222_Request *req,
+                                    cormoran_paw3222_Response *resp);
 
 /** @brief Broadcast `req` to every connected peripheral without waiting for
  * (or producing) a DeferredResponse -- used for GetInfo's
@@ -50,7 +50,7 @@ void paw3222_relay_dispatch_request(uint32_t source, const xinta_paw3222_Request
  * @return The request_id every responding peripheral's PeripheralResponse
  *   notification will carry (nonzero), or 0 if encoding failed (logged).
  */
-uint32_t paw3222_relay_broadcast_request(const xinta_paw3222_Request *req);
+uint32_t paw3222_relay_broadcast_request(const cormoran_paw3222_Request *req);
 
 #ifdef __cplusplus
 }

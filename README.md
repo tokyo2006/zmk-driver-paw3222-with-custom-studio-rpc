@@ -40,7 +40,7 @@ Devicetree:
 
 &spi0 {
     trackball: trackball@0 {
-        compatible = "xinta,paw3222";
+        compatible = "cormoran,paw3222";
         reg = <0>;
         spi-max-frequency = <2000000>;
         irq-gpios = <&gpio0 15 GPIO_ACTIVE_LOW>;

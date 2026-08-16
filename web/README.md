@@ -10,9 +10,9 @@ PAW3222 ZMK module's custom Studio RPC subsystem.
   error/runtime config) and `ReadDiagnostics` (SQUAL/shutter/pixel min-avg-max),
   with optional 1s auto-refresh for diagnostics
 - **Settings panel**: generic editor for the sensor's own custom settings
-  (subsystem `xinta__paw3222`), talking to the separate
+  (subsystem `cormoran__paw3222`), talking to the separate
   `cormoran_custom_settings` subsystem provided by
-  [zmk-feature-custom-settings](https://github.com/xinta/zmk-feature-custom-settings)
+  [zmk-feature-custom-settings](https://github.com/cormoran/zmk-feature-custom-settings)
   (list/edit/write with memory or persist mode, save/discard/reset)
 - **Frame viewer**: capture a still image from the sensor using the official
   PAW3222 datasheet `Pixel_Grab` procedure, and render it to a `<canvas>`.
@@ -22,7 +22,7 @@ PAW3222 ZMK module's custom Studio RPC subsystem.
   firmware (no client-side polling loop) -- see "Frame viewer notes" below.
   Also shows an FPS counter, an invalid-byte (PG_VALID clear) warning count,
   and an advanced panel for the per-pixel retry budget.
-- **Studio lock awareness**: the `xinta__paw3222` subsystem is secured
+- **Studio lock awareness**: the `cormoran__paw3222` subsystem is secured
   (see the module README's "Security" section) -- the UI shows a banner and
   disables settings/frame controls while ZMK Studio is locked, and reacts to
   `UNLOCK_REQUIRED` RPC errors even if no lock notification was seen yet.
@@ -62,7 +62,7 @@ src/
 ├── frame.ts               # Pure frame-chunk reassembly + pixel conversion helpers
 ├── settingsJson.ts        # Settings export/import JSON document helpers
 └── proto/                 # Generated protobuf TypeScript types (buf generate)
-    └── xinta/
+    └── cormoran/
         ├── paw3222/
         │   └── paw3222.ts
         └── zmk/custom_settings/
@@ -81,9 +81,9 @@ test/
 ### 1. Protocol Definition
 
 This module's own protobuf schema is defined in
-`../proto/xinta/paw3222/paw3222.proto`. The settings panel additionally
+`../proto/cormoran/paw3222/paw3222.proto`. The settings panel additionally
 talks to zmk-feature-custom-settings' generic custom-settings subsystem,
-whose schema (`xinta/zmk/custom_settings/custom_settings.proto`) lives in
+whose schema (`cormoran/zmk/custom_settings/custom_settings.proto`) lives in
 that dependency's own repo, not this one.
 
 ### 2. Code Generation
@@ -116,7 +116,7 @@ import { useZMKApp, ZMKCustomSubsystem } from "@cormoran/zmk-studio-react-hook";
 const { state, connect, findSubsystem, isConnected } = useZMKApp();
 
 // Find the PAW3222 subsystem
-const subsystem = findSubsystem("xinta__paw3222");
+const subsystem = findSubsystem("cormoran__paw3222");
 
 // Create service and make RPC calls
 const service = new ZMKCustomSubsystem(state.connection, subsystem.index);
@@ -126,7 +126,7 @@ const response = await service.callRPC(payload);
 The settings panel does the same thing but against a different subsystem:
 `findSubsystem("cormoran_custom_settings")` (zmk-feature-custom-settings'
 generic settings RPC), using `SettingRef.customSubsystemIndex` to point at
-this module's `findSubsystem("xinta__paw3222")` result for `list_settings`
+this module's `findSubsystem("cormoran__paw3222")` result for `list_settings`
 / `write_setting` scopes.
 
 ## Testing
@@ -154,7 +154,7 @@ import {
 
 const mockZMKApp = createConnectedMockZMKApp({
   deviceName: "Test Device",
-  subsystems: ["xinta__paw3222"],
+  subsystems: ["cormoran__paw3222"],
 });
 
 render(

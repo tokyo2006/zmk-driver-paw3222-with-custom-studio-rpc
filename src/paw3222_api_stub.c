@@ -1,10 +1,10 @@
 /*
  * Fallback implementation of the PAW3222 public API used when the driver
  * core (CONFIG_PAW3222) is not compiled in, e.g. native_sim which has no
- * devicetree node for the sensor (DT_HAS_XINTA_PAW3222_ENABLED=n).
+ * devicetree node for the sensor (DT_HAS_CORMORAN_PAW3222_ENABLED=n).
  */
 
-#include <xinta/paw3222/paw3222_api.h>
+#include <cormoran/paw3222/paw3222_api.h>
 #include <zephyr/sys/util.h>
 #include <errno.h>
 

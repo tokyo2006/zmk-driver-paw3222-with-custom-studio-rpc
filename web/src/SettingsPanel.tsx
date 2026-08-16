@@ -14,7 +14,7 @@ import {
 
 /**
  * Generic custom-settings editor for the PAW3222 sensor's own settings
- * subsystem ("xinta__paw3222"). Talks to zmk-feature-custom-settings'
+ * subsystem ("cormoran__paw3222"). Talks to zmk-feature-custom-settings'
  * separate Studio RPC subsystem (identifier "cormoran_custom_settings",
  * see dependencies/zmk-feature-custom-settings/src/studio/custom_settings_handler.c),
  * not the paw3222 subsystem itself -- settings get/set/save/discard/reset
@@ -28,7 +28,7 @@ import {
  */
 
 export const CUSTOM_SETTINGS_SUBSYSTEM_IDENTIFIER = "cormoran_custom_settings";
-export const PAW3222_SETTINGS_SUBSYSTEM_ID = "xinta__paw3222";
+export const PAW3222_SETTINGS_SUBSYSTEM_ID = "cormoran__paw3222";
 
 const LIST_NOTIFICATION_TIMEOUT_MS = 750;
 const LIST_REQUEST_TIMEOUT_MS = 5000;
@@ -56,7 +56,7 @@ export function SettingsPanel({ locked = false }: SettingsPanelProps = {}) {
   const settingsSubsystem = zmkApp?.findSubsystem(
     CUSTOM_SETTINGS_SUBSYSTEM_IDENTIFIER
   );
-  const paw3222Subsystem = zmkApp?.findSubsystem("xinta__paw3222");
+  const paw3222Subsystem = zmkApp?.findSubsystem("cormoran__paw3222");
 
   const callCustomRequest = async (request: Request): Promise<Response> => {
     const connection = zmkApp?.state.connection;

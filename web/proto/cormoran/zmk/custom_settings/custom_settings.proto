@@ -4,7 +4,7 @@
 // up a west workspace, so a buf input directory outside this repo (e.g.
 // ../dependencies/zmk-feature-custom-settings/proto) resolves locally but
 // fails in CI with "no such file or directory". This file is a snapshot of
-// xinta/zmk-feature-custom-settings's
+// cormoran/zmk-feature-custom-settings's
 // proto/cormoran/zmk/custom_settings/custom_settings.proto at commit
 // 7c289073fc140832544a31cd80416506aea9bf0c (2026-05-31).
 //

@@ -20,7 +20,7 @@ const config: Config = {
     // Mock CSS imports
     "\\.(css|less|scss|sass)$": "identity-obj-proxy",
   },
-  transformIgnorePatterns: ["node_modules/(?!(@xinta|@zmkfirmware)/)"],
+  transformIgnorePatterns: ["node_modules/(?!(@cormoran|@zmkfirmware)/)"],
   transform: {
     "^.+\\.(js|jsx|ts|tsx)$": [
       "ts-jest",

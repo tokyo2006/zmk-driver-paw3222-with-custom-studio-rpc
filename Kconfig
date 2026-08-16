@@ -2,7 +2,7 @@ menuconfig PAW3222
   bool "PAW3222 mouse optical sensor"
   select SPI
   depends on INPUT
-  depends on DT_HAS_XINTA_PAW3222_ENABLED
+  depends on DT_HAS_CORMORAN_PAW3222_ENABLED
   help
       Enable PAW3222 mouse optical sensor.
 
@@ -29,7 +29,7 @@ config ZMK_PAW3222_SPLIT_RPC_RELAY
     select ZMK_PAW3222_PROTOBUF
     help
       Enable on BOTH halves of a split keyboard to reach PAW3222 devices
-      living on a split peripheral through the central's xinta__paw3222
+      living on a split peripheral through the central's cormoran__paw3222
       Studio RPC subsystem: any request with a nonzero `source` is relayed to
       the matching peripheral over CONFIG_ZMK_SPLIT_RELAY_EVENT, and the
       response arrives back as a PeripheralResponse Studio notification
@@ -48,6 +48,6 @@ config ZMK_PAW3222_CUSTOM_SETTINGS
     depends on ZMK_CUSTOM_SETTINGS
     help
       Registers PAW3222 sensor parameters (cpi, force-awake) as custom
-      settings (subsystem "xinta__paw3222"), readable/writable over the
+      settings (subsystem "cormoran__paw3222"), readable/writable over the
       generic custom-settings Studio RPC subsystem and persisted via the
       Zephyr settings subsystem. Works with zero PAW3222 devices present.

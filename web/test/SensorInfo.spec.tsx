@@ -42,7 +42,7 @@ describe("SensorInfo Component", () => {
       );
 
       expect(
-        screen.getByText(/Subsystem "xinta__paw3222" not found/i)
+        screen.getByText(/Subsystem "cormoran__paw3222" not found/i)
       ).toBeInTheDocument();
     });
   });

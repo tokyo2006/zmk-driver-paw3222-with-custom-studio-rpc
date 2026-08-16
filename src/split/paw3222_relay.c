@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 xinta
+ * Copyright (c) 2026 cormoran
  *
  * SPDX-License-Identifier: MIT
  */
@@ -7,7 +7,7 @@
 /**
  * @file paw3222_relay.c
  *
- * @brief Split relay bridge for the `xinta.paw3222` Studio RPC subsystem
+ * @brief Split relay bridge for the `cormoran.paw3222` Studio RPC subsystem
  * (CONFIG_ZMK_PAW3222_SPLIT_RPC_RELAY, see DESIGN.md Phase F) -- enabled on
  * BOTH halves of a split keyboard:
  *
@@ -86,9 +86,9 @@
 #include <zmk/split/central.h>
 #endif
 
-#include <xinta/paw3222/paw3222.pb.h>
-#include <xinta/paw3222/paw3222_relay.h>
-#include <xinta/paw3222/paw3222_request_exec.h>
+#include <cormoran/paw3222/paw3222.pb.h>
+#include <cormoran/paw3222/paw3222_relay.h>
+#include <cormoran/paw3222/paw3222_request_exec.h>
 
 #if IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
 #include <zmk/studio/custom.h>
@@ -97,18 +97,18 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
-/* Matches the identifier stringified by ZMK_RPC_CUSTOM_SUBSYSTEM(xinta__paw3222, ...)
+/* Matches the identifier stringified by ZMK_RPC_CUSTOM_SUBSYSTEM(cormoran__paw3222, ...)
  * in paw3222_handler.c -- kept as a separate copy here (not shared via a
  * header) since it is only ever needed as a literal string for the
  * subsystem-index lookup below. */
-#define PAW3222_SUBSYSTEM_IDENTIFIER_STRING "xinta__paw3222"
+#define PAW3222_SUBSYSTEM_IDENTIFIER_STRING "cormoran__paw3222"
 
 /* nanopb generates a static worst-case encoded size for every message here
  * since every bytes/string/repeated field in paw3222.proto has an explicit
  * max_size/max_count (see paw3222.options) -- used to size the relay event
  * payload buffers below exactly, instead of guessing a constant. */
-#define PAW3222_RELAY_REQUEST_PAYLOAD_MAX_SIZE xinta_paw3222_RelayRequest_size
-#define PAW3222_RELAY_RESPONSE_PAYLOAD_MAX_SIZE xinta_paw3222_RelayResponse_size
+#define PAW3222_RELAY_REQUEST_PAYLOAD_MAX_SIZE cormoran_paw3222_RelayRequest_size
+#define PAW3222_RELAY_RESPONSE_PAYLOAD_MAX_SIZE cormoran_paw3222_RelayResponse_size
 
 struct zmk_paw3222_relay_request {
     uint8_t source;
@@ -210,24 +210,24 @@ ZMK_RELAY_EVENT_PERIPHERAL_TO_CENTRAL_SERIALIZE(zmk_paw3222_relay_response, pmp,
  * event listener below) so the split-relay self-test can exercise it
  * directly without needing a real relay event. */
 static int paw3222_relay_exec_request(const uint8_t *payload, size_t size,
-                                      xinta_paw3222_RelayResponse *out_resp) {
-    xinta_paw3222_RelayRequest relay_req = xinta_paw3222_RelayRequest_init_zero;
+                                      cormoran_paw3222_RelayResponse *out_resp) {
+    cormoran_paw3222_RelayRequest relay_req = cormoran_paw3222_RelayRequest_init_zero;
     pb_istream_t istream = pb_istream_from_buffer(payload, size);
-    if (!pb_decode(&istream, xinta_paw3222_RelayRequest_fields, &relay_req)) {
+    if (!pb_decode(&istream, cormoran_paw3222_RelayRequest_fields, &relay_req)) {
         LOG_WRN("Failed to decode paw3222 relay request: %s", PB_GET_ERROR(&istream));
         return -EINVAL;
     }
 
-    *out_resp = (xinta_paw3222_RelayResponse)xinta_paw3222_RelayResponse_init_zero;
+    *out_resp = (cormoran_paw3222_RelayResponse)cormoran_paw3222_RelayResponse_init_zero;
     out_resp->request_id = relay_req.request_id;
     out_resp->has_response = true;
 
     if (!relay_req.has_request ||
         !paw3222_request_exec_handle(&relay_req.request, &out_resp->response)) {
-        xinta_paw3222_ErrorResponse err = xinta_paw3222_ErrorResponse_init_zero;
+        cormoran_paw3222_ErrorResponse err = cormoran_paw3222_ErrorResponse_init_zero;
         snprintf(err.message, sizeof(err.message),
                  "unsupported or missing relayed paw3222 request");
-        out_resp->response.which_response_type = xinta_paw3222_Response_error_tag;
+        out_resp->response.which_response_type = cormoran_paw3222_Response_error_tag;
         out_resp->response.response_type.error = err;
     }
 
@@ -246,7 +246,7 @@ static size_t relay_request_work_payload_size;
 static void relay_request_work_handler(struct k_work *work) {
     ARG_UNUSED(work);
 
-    xinta_paw3222_RelayResponse relay_resp;
+    cormoran_paw3222_RelayResponse relay_resp;
     if (paw3222_relay_exec_request(relay_request_work_payload, relay_request_work_payload_size,
                                    &relay_resp) < 0) {
         return;
@@ -254,7 +254,7 @@ static void relay_request_work_handler(struct k_work *work) {
 
     struct zmk_paw3222_relay_response resp_event = {.source = ZMK_RELAY_EVENT_SOURCE_SELF};
     pb_ostream_t ostream = pb_ostream_from_buffer(resp_event.payload, sizeof(resp_event.payload));
-    if (!pb_encode(&ostream, xinta_paw3222_RelayResponse_fields, &relay_resp)) {
+    if (!pb_encode(&ostream, cormoran_paw3222_RelayResponse_fields, &relay_resp)) {
         LOG_WRN("Failed to encode paw3222 relay response: %s", PB_GET_ERROR(&ostream));
         return;
     }
@@ -337,17 +337,17 @@ static uint32_t next_relay_request_id = 1;
  * DeferredResponse) and paw3222_relay_broadcast_request() (fire-and-forget,
  * every connected peripheral answers independently). Returns the assigned
  * request_id (nonzero) on success, or 0 on encode failure (logged). */
-static uint32_t send_relay_request(const xinta_paw3222_Request *req) {
+static uint32_t send_relay_request(const cormoran_paw3222_Request *req) {
     uint32_t request_id = next_relay_request_id++;
 
-    xinta_paw3222_RelayRequest relay_req = xinta_paw3222_RelayRequest_init_zero;
+    cormoran_paw3222_RelayRequest relay_req = cormoran_paw3222_RelayRequest_init_zero;
     relay_req.request_id = request_id;
     relay_req.has_request = true;
     relay_req.request = *req;
 
     struct zmk_paw3222_relay_request event = {.source = ZMK_RELAY_EVENT_SOURCE_SELF};
     pb_ostream_t ostream = pb_ostream_from_buffer(event.payload, sizeof(event.payload));
-    if (!pb_encode(&ostream, xinta_paw3222_RelayRequest_fields, &relay_req)) {
+    if (!pb_encode(&ostream, cormoran_paw3222_RelayRequest_fields, &relay_req)) {
         LOG_WRN("Failed to encode paw3222 relay request: %s", PB_GET_ERROR(&ostream));
         return 0;
     }
@@ -357,40 +357,40 @@ static uint32_t send_relay_request(const xinta_paw3222_Request *req) {
     return request_id;
 }
 
-void paw3222_relay_dispatch_request(uint32_t source, const xinta_paw3222_Request *req,
-                                    xinta_paw3222_Response *resp) {
+void paw3222_relay_dispatch_request(uint32_t source, const cormoran_paw3222_Request *req,
+                                    cormoran_paw3222_Response *resp) {
     ARG_UNUSED(source); /* Transport broadcasts to every peripheral -- see file doc comment. */
 
     uint32_t request_id = send_relay_request(req);
     if (request_id == 0) {
-        xinta_paw3222_ErrorResponse err = xinta_paw3222_ErrorResponse_init_zero;
+        cormoran_paw3222_ErrorResponse err = cormoran_paw3222_ErrorResponse_init_zero;
         snprintf(err.message, sizeof(err.message), "failed to encode relay request");
-        resp->which_response_type = xinta_paw3222_Response_error_tag;
+        resp->which_response_type = cormoran_paw3222_Response_error_tag;
         resp->response_type.error = err;
         return;
     }
 
-    xinta_paw3222_DeferredResponse deferred = xinta_paw3222_DeferredResponse_init_zero;
+    cormoran_paw3222_DeferredResponse deferred = cormoran_paw3222_DeferredResponse_init_zero;
     deferred.request_id = request_id;
-    resp->which_response_type = xinta_paw3222_Response_deferred_tag;
+    resp->which_response_type = cormoran_paw3222_Response_deferred_tag;
     resp->response_type.deferred = deferred;
 }
 
-uint32_t paw3222_relay_broadcast_request(const xinta_paw3222_Request *req) {
+uint32_t paw3222_relay_broadcast_request(const cormoran_paw3222_Request *req) {
     return send_relay_request(req);
 }
 
 static K_MUTEX_DEFINE(peripheral_response_notification_lock);
-static xinta_paw3222_Notification peripheral_response_notification;
+static cormoran_paw3222_Notification peripheral_response_notification;
 
 static bool encode_paw3222_notification_payload(pb_ostream_t *stream, const pb_field_t *field,
                                                 void *const *arg) {
-    const xinta_paw3222_Notification *notification = (const xinta_paw3222_Notification *)*arg;
+    const cormoran_paw3222_Notification *notification = (const cormoran_paw3222_Notification *)*arg;
     return zmk_rpc_custom_subsystem_encode_response_payload(
-        stream, field, xinta_paw3222_Notification_fields, notification);
+        stream, field, cormoran_paw3222_Notification_fields, notification);
 }
 
-static int raise_paw3222_notification(xinta_paw3222_Notification *notification) {
+static int raise_paw3222_notification(cormoran_paw3222_Notification *notification) {
     int index = custom_subsystem_index();
     if (index < 0) {
         return index;
@@ -414,10 +414,10 @@ static size_t relay_response_work_payload_size;
 static void relay_response_work_handler(struct k_work *work) {
     ARG_UNUSED(work);
 
-    xinta_paw3222_RelayResponse relay_resp = xinta_paw3222_RelayResponse_init_zero;
+    cormoran_paw3222_RelayResponse relay_resp = cormoran_paw3222_RelayResponse_init_zero;
     pb_istream_t istream =
         pb_istream_from_buffer(relay_response_work_payload, relay_response_work_payload_size);
-    if (!pb_decode(&istream, xinta_paw3222_RelayResponse_fields, &relay_resp)) {
+    if (!pb_decode(&istream, cormoran_paw3222_RelayResponse_fields, &relay_resp)) {
         LOG_WRN("Failed to decode paw3222 relay response: %s", PB_GET_ERROR(&istream));
         return;
     }
@@ -425,10 +425,10 @@ static void relay_response_work_handler(struct k_work *work) {
     k_mutex_lock(&peripheral_response_notification_lock, K_FOREVER);
 
     peripheral_response_notification =
-        (xinta_paw3222_Notification)xinta_paw3222_Notification_init_zero;
+        (cormoran_paw3222_Notification)cormoran_paw3222_Notification_init_zero;
     peripheral_response_notification.which_notification_type =
-        xinta_paw3222_Notification_peripheral_response_tag;
-    xinta_paw3222_PeripheralResponse *pr =
+        cormoran_paw3222_Notification_peripheral_response_tag;
+    cormoran_paw3222_PeripheralResponse *pr =
         &peripheral_response_notification.notification_type.peripheral_response;
     /* Stashed source was rewritten by ZMK_RELAY_EVENT_HANDLE's receive-side
      * `source_field_name = ev->source + 1` to the relaying peripheral's
@@ -477,20 +477,20 @@ ZMK_SUBSCRIPTION(paw3222_relay_response_notify, zmk_paw3222_relay_response);
     !IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
 
 static int paw3222_split_relay_test_init(void) {
-    xinta_paw3222_RelayRequest relay_req = xinta_paw3222_RelayRequest_init_zero;
+    cormoran_paw3222_RelayRequest relay_req = cormoran_paw3222_RelayRequest_init_zero;
     relay_req.request_id = 42;
     relay_req.has_request = true;
-    relay_req.request.which_request_type = xinta_paw3222_Request_get_info_tag;
+    relay_req.request.which_request_type = cormoran_paw3222_Request_get_info_tag;
     relay_req.request.request_type.get_info.source = 1;
 
     uint8_t payload[PAW3222_RELAY_REQUEST_PAYLOAD_MAX_SIZE];
     pb_ostream_t ostream = pb_ostream_from_buffer(payload, sizeof(payload));
-    if (!pb_encode(&ostream, xinta_paw3222_RelayRequest_fields, &relay_req)) {
+    if (!pb_encode(&ostream, cormoran_paw3222_RelayRequest_fields, &relay_req)) {
         LOG_ERR("Split relay test: failed to encode synthetic request: %s", PB_GET_ERROR(&ostream));
         return -EIO;
     }
 
-    xinta_paw3222_RelayResponse relay_resp;
+    cormoran_paw3222_RelayResponse relay_resp;
     int ret = paw3222_relay_exec_request(payload, ostream.bytes_written, &relay_resp);
     if (ret < 0) {
         LOG_ERR("Split relay test: exec failed: %d", ret);
@@ -501,7 +501,7 @@ static int paw3222_split_relay_test_init(void) {
         LOG_ERR("Split relay test: request_id mismatch: got %u", relay_resp.request_id);
         return -EINVAL;
     }
-    if (relay_resp.response.which_response_type != xinta_paw3222_Response_get_info_tag) {
+    if (relay_resp.response.which_response_type != cormoran_paw3222_Response_get_info_tag) {
         LOG_ERR("Split relay test: expected a GetInfoResponse, got response type %d",
                 relay_resp.response.which_response_type);
         return -EINVAL;
@@ -513,11 +513,11 @@ static int paw3222_split_relay_test_init(void) {
     /* Genuinely unsupported/malformed relayed request (no request_type set
      * at all): paw3222_request_exec_handle() returns false, which must
      * still produce an ErrorResponse, not a crash or an unfilled response. */
-    xinta_paw3222_RelayRequest empty_relay_req = xinta_paw3222_RelayRequest_init_zero;
+    cormoran_paw3222_RelayRequest empty_relay_req = cormoran_paw3222_RelayRequest_init_zero;
     empty_relay_req.request_id = 43;
     empty_relay_req.has_request = true;
     ostream = pb_ostream_from_buffer(payload, sizeof(payload));
-    if (!pb_encode(&ostream, xinta_paw3222_RelayRequest_fields, &empty_relay_req)) {
+    if (!pb_encode(&ostream, cormoran_paw3222_RelayRequest_fields, &empty_relay_req)) {
         LOG_ERR("Split relay test: failed to encode empty request: %s", PB_GET_ERROR(&ostream));
         return -EIO;
     }
@@ -526,7 +526,7 @@ static int paw3222_split_relay_test_init(void) {
         LOG_ERR("Split relay test: empty-request exec failed: %d", ret);
         return ret;
     }
-    if (relay_resp.response.which_response_type != xinta_paw3222_Response_error_tag) {
+    if (relay_resp.response.which_response_type != cormoran_paw3222_Response_error_tag) {
         LOG_ERR("Split relay test: expected an ErrorResponse for an unset request kind, got "
                 "response type %d",
                 relay_resp.response.which_response_type);
@@ -549,8 +549,8 @@ SYS_INIT(paw3222_split_relay_test_init, APPLICATION, CONFIG_APPLICATION_INIT_PRI
  * cannot, without a real peripheral) assert that a broadcast actually
  * reaches anyone; that is exactly what native_sim cannot simulate. */
 static int paw3222_split_relay_central_test_init(void) {
-    xinta_paw3222_Request req = xinta_paw3222_Request_init_zero;
-    req.which_request_type = xinta_paw3222_Request_get_info_tag;
+    cormoran_paw3222_Request req = cormoran_paw3222_Request_init_zero;
+    req.which_request_type = cormoran_paw3222_Request_get_info_tag;
     req.request_type.get_info.source = PAW3222_SOURCE_ALL;
 
     uint32_t id1 = paw3222_relay_broadcast_request(&req);
