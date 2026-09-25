@@ -902,6 +902,25 @@ int paw3222_set_force_awake(const struct device *dev, bool enabled) {
     return err;
 }
 
+// TEST ONLY: blue LED mirrors ZMK activity state (on = active).
+static const struct gpio_dt_spec debug_led = GPIO_DT_SPEC_GET(DT_NODELABEL(blue_led), gpios);
+
+static void debug_led_set(bool on) {
+    static bool configured;
+    if (!configured) {
+        gpio_pin_configure_dt(&debug_led, GPIO_OUTPUT_INACTIVE);
+        configured = true;
+    }
+    gpio_pin_set_dt(&debug_led, on);
+}
+
+static int debug_led_init(void) {
+    debug_led_set(true);
+    return 0;
+}
+
+SYS_INIT(debug_led_init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
+
 // Like the PMW3610 driver: drop force-awake while idle so the sensor can enter its rest modes.
 static int on_activity_state(const zmk_event_t *eh) {
     struct zmk_activity_state_changed *state_ev = as_zmk_activity_state_changed(eh);
@@ -911,6 +930,7 @@ static int on_activity_state(const zmk_event_t *eh) {
     }
 
     bool active = state_ev->state == ZMK_ACTIVITY_ACTIVE;
+    debug_led_set(active);
     for (size_t i = 0; i < ARRAY_SIZE(paw3222_devs); i++) {
         const struct device *dev = paw3222_devs[i];
         struct paw32xx_data *data = dev->data;
