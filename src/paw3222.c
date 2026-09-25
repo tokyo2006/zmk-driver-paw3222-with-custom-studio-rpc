@@ -26,6 +26,10 @@
 #include <hal/nrf_spim.h>
 #endif
 
+#include <zmk/activity.h>
+#include <zmk/event_manager.h>
+#include <zmk/events/activity_state_changed.h>
+
 #include "../include/paw3222.h"
 #include <cormoran/paw3222/paw3222_api.h>
 #include <cormoran/paw3222/paw3222_settings_apply.h>
@@ -891,10 +895,37 @@ int paw3222_set_force_awake(const struct device *dev, bool enabled) {
     data->runtime.force_awake = enabled;
     int err = 0;
     if (data->ready) {
-        err = paw32xx_force_awake(dev, enabled);
+        bool active = zmk_activity_get_state() == ZMK_ACTIVITY_ACTIVE;
+        err = paw32xx_force_awake(dev, enabled && active);
     }
     k_mutex_unlock(&data->lock);
     return err;
 }
+
+// Like the PMW3610 driver: drop force-awake while idle so the sensor can enter its rest modes.
+static int on_activity_state(const zmk_event_t *eh) {
+    struct zmk_activity_state_changed *state_ev = as_zmk_activity_state_changed(eh);
+
+    if (!state_ev) {
+        return 0;
+    }
+
+    bool active = state_ev->state == ZMK_ACTIVITY_ACTIVE;
+    for (size_t i = 0; i < ARRAY_SIZE(paw3222_devs); i++) {
+        const struct device *dev = paw3222_devs[i];
+        struct paw32xx_data *data = dev->data;
+
+        k_mutex_lock(&data->lock, K_FOREVER);
+        if (data->ready) {
+            paw32xx_force_awake(dev, data->runtime.force_awake && active);
+        }
+        k_mutex_unlock(&data->lock);
+    }
+
+    return 0;
+}
+
+ZMK_LISTENER(zmk_paw3222_idle_sleeper, on_activity_state);
+ZMK_SUBSCRIPTION(zmk_paw3222_idle_sleeper, zmk_activity_state_changed);
 
 #endif // DT_HAS_COMPAT_STATUS_OKAY(DT_DRV_COMPAT)
