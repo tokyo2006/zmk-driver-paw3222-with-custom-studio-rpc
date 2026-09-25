@@ -407,6 +407,10 @@ static void paw32xx_motion_work_handler(struct k_work *work) {
     int16_t x, y;
     int ret;
 
+    if (!data->ready) {
+        return;
+    }
+
     ret = paw32xx_read_reg(dev, PAW32XX_MOTION, &val);
     if (ret < 0) {
         return;
@@ -427,6 +431,12 @@ static void paw32xx_motion_work_handler(struct k_work *work) {
     }
 
     LOG_DBG("x=%4d y=%4d", x, y);
+
+    // Zero deltas still count as ZMK activity and would keep the keyboard awake forever.
+    if (x == 0 && y == 0) {
+        paw32xx_interrupt_enable(dev);
+        return;
+    }
 
     input_report(data->dev, cfg->evt_type, cfg->x_input_code, x, false, K_FOREVER);
     input_report(data->dev, cfg->evt_type, cfg->y_input_code, y, true, K_FOREVER);
@@ -564,6 +574,7 @@ static void paw32xx_async_init(struct k_work *work) {
 
     data->ready = true;
     data->err = 0;
+    paw32xx_interrupt_enable(dev);
     LOG_INF("paw32xx: initialized");
 }
 
@@ -672,6 +683,8 @@ static int paw32xx_pm_action(const struct device *dev, enum pm_device_action act
         // 取消初始化任务，断开IRQ，标记未就绪
         k_work_cancel_delayable(&data->init_work);
         data->ready = false;
+        k_timer_stop(&data->motion_timer);
+        k_work_cancel(&data->motion_work);
         ret = paw32xx_interrupt_disable(dev);
         if (ret < 0) {
             LOG_ERR("Failed to disable IRQ interrupt: %d", ret);
@@ -685,7 +698,8 @@ static int paw32xx_pm_action(const struct device *dev, enum pm_device_action act
         val = CONFIGURATION_PD_ENH;
         ret = paw32xx_update_reg(dev, PAW32XX_CONFIGURATION, CONFIGURATION_PD_ENH, val);
         if (ret < 0) {
-            return ret;
+            // Failing here would make ZMK abort sys_poweroff and retry forever.
+            LOG_WRN("Failed to power down sensor: %d", ret);
         }
         break;
     case PM_DEVICE_ACTION_RESUME:
