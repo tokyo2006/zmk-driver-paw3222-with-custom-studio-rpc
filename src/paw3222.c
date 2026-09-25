@@ -433,7 +433,7 @@ static void paw32xx_motion_work_handler(struct k_work *work) {
     LOG_DBG("x=%4d y=%4d", x, y);
 
     // Zero deltas still count as ZMK activity and would keep the keyboard awake forever.
-    if (x != 0 || y != 0) {
+    if (0) { // TEST ONLY: never report, to tell activity from suspend problems
         input_report(data->dev, cfg->evt_type, cfg->x_input_code, x, false, K_FOREVER);
         input_report(data->dev, cfg->evt_type, cfg->y_input_code, y, true, K_FOREVER);
     }
