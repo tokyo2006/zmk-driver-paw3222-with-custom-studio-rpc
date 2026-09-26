@@ -915,6 +915,15 @@ static void debug_led_set(bool on) {
 }
 
 static int debug_led_init(void) {
+    // 5 blinks: woke from System OFF via GPIO DETECT; 2 blinks: any other boot.
+    bool woke_by_gpio = (NRF_POWER->RESETREAS & POWER_RESETREAS_OFF_Msk) != 0;
+    NRF_POWER->RESETREAS = 0xFFFFFFFF;
+    for (int i = 0; i < (woke_by_gpio ? 5 : 2); i++) {
+        debug_led_set(true);
+        k_busy_wait(150 * 1000);
+        debug_led_set(false);
+        k_busy_wait(150 * 1000);
+    }
     debug_led_set(true);
     return 0;
 }
